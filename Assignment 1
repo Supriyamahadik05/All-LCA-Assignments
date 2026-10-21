@@ -1,1 +1,52 @@
 
+# Student Data Management Using Python Collections
+
+# Creating a list of student records using tuples
+students = [
+    (101, "Amit", "Computer", 85),
+    (102, "Priya", "IT", 90),
+    (103, "Rahul", "Mechanical", 78)
+]
+
+# Creating a dictionary from the list of tuples
+student_dict = {
+    roll_no: {
+        "Name": name,
+        "Branch": branch,
+        "Marks": marks
+    }
+    for roll_no, name, branch, marks in students
+}
+
+# 1. Add a new student record
+student_dict[104] = {
+    "Name": "Sneha",
+    "Branch": "Electronics",
+    "Marks": 88
+}
+
+print("After Adding a Student:")
+print(student_dict)
+
+# 2. Delete an existing student record
+del student_dict[102]
+
+print("\nAfter Deleting a Student:")
+print(student_dict)
+
+# 3. Update the details of a student
+student_dict[103]["Name"] = "Rahul Sharma"
+student_dict[103]["Marks"] = 82
+
+print("\nAfter Updating a Student:")
+print(student_dict)
+
+# 4. Display the final student records
+print("\nFinal Student Records:")
+
+for roll_no, details in student_dict.items():
+    print("Roll Number:", roll_no)
+    print("Name:", details["Name"])
+    print("Branch:", details["Branch"])
+    print("Marks:", details["Marks"])
+    print("-" * 25)
