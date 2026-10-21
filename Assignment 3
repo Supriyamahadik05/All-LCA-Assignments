@@ -1,1 +1,24 @@
+# Python Program to Check Whether a Triangle is Right-Angled Using a Function
 
+def is_right_angled(a, b, c):
+    sides = sorted([a, b, c])
+
+    if sides[0] <= 0:
+        return False
+
+    return sides[0]**2 + sides[1]**2 == sides[2]**2
+
+
+# Accept the lengths of three sides
+a = float(input("Enter the first side: "))
+b = float(input("Enter the second side: "))
+c = float(input("Enter the third side: "))
+
+# Check whether the sides form a triangle
+if a + b > c and a + c > b and b + c > a:
+    if is_right_angled(a, b, c):
+        print("The triangle is a right-angled triangle.")
+    else:
+        print("The triangle is not a right-angled triangle.")
+else:
+    print("The given sides do not form a triangle.")
