@@ -1,1 +1,69 @@
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+# 1. Load Data dynamically
+file = (
+    input("Enter CSV filename (or press Enter for default): ").strip()
+    or "sample_data_assignment_07.csv"
+)
+if not os.path.exists(file):
+  pd.DataFrame({
+      "Student": ["Amit", "Bhavna", "Chetan", "Diya", "Esha", "Farhan"],
+      "Maths":,
+      "Python":,
+      "Attendance":,
+      "City": ["Pune", "Mumbai", "Pune", "Nashik", "Mumbai", "Pune"],
+  }).to_csv(file, index=False)
+
+df = pd.read_csv(file)
+
+# 2. Display Averages
+print("\n--- Averages ---")
+print(df[["Maths", "Python", "Attendance"]].mean().round(2))
+
+# 3. Plotting Setup (Using subplots to combine and save space)
+fig, axes = plt.subplots(3, 2, figsize=(12, 14))
+sns.set_theme(style="whitegrid")
+
+# Core Plots
+axes[0, 0].plot(
+    df["Student"], df["Python"], marker="o", color="orange", label="Python"
+)
+axes[0, 0].set_title("Python Trends")
+
+axes[0, 1].bar(df["Student"], df["Maths"], color="royalblue")
+axes[0, 1].set_title("Maths Marks")
+
+axes[1, 0].scatter(df["Maths"], df["Python"], color="crimson", s=80)
+axes[1, 0].set_title("Maths vs Python")
+
+# Correlation Heatmap
+sns.heatmap(
+    df[["Maths", "Python", "Attendance"]].corr(),
+    annot=True,
+    cmap="Blues",
+    ax=axes[1, 1],
+    vmin=-1,
+    vmax=1,
+)
+axes[1, 1].set_title("Correlation Heatmap")
+
+# Extension Plots
+sns.histplot(df["Python"], bins=4, kde=True, color="purple", ax=axes[2, 0])
+axes[2, 0].set_title("Python Distribution (Histogram)")
+
+sns.boxplot(data=df[["Maths", "Python"]], palette="Set2", ax=axes[2, 1])
+axes[2, 1].set_title("Maths vs Python Boxplot")
+
+plt.tight_layout()
+plt.show()
+
+# Separate standalone Pie Chart
+plt.figure(figsize=(5, 5))
+df["City"].value_counts().plot.pie(autopct="%1.1f%%", colors=["lightblue", "lightgreen", "pink"])
+plt.title("City Distribution")
+plt.ylabel("")
+plt.show()
 
