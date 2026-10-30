@@ -1,101 +1,162 @@
-"""
-Title: Data Preprocessing using Python Pandas
-Platform: Windows / Ubuntu (Jupyter Notebook / IDLE / VS Code)
-Description: Demonstrates loading, exploring, handling missing values, 
-             removing duplicates, and filtering data from a .csv/.xls file.
-"""
+#Assignment 6: Data Preprocessing
+# Dataset: array.xlsx
+# Libraries: Pandas and NumPy
 
-import numpy as np
 import pandas as pd
+import numpy as np
+from pathlib import Path
 
 
-def create_sample_dataset():
-  """Creates a sample student dataset and saves it as a CSV file for demonstration."""
-  data = {
-      'Student_ID': [101, 102, 103, 104, 105, 106, 107, 104],  # Note: 104 is duplicate
-      'Name': [
-          'Aarav',
-          'Meera',
-          'Rohan',
-          'Priya',
-          'Kabir',
-          np.nan,
-          'Sneha',
-          'Priya',
-      ],
-      'Marks': [85, 90, np.nan, 78, 92, 88, 79, 78],
-      'City': [
-          'Pune',
-          'Mumbai',
-          'Delhi',
-          'Pune',
-          np.nan,
-          'Bangalore',
-          'Chennai',
-          'Pune',
-      ],
-  }
-  df_sample = pd.DataFrame(data)
-  df_sample.to_csv('student_data.csv', index=False)
-  print('Sample dataset "student_data.csv" created successfully.\n')
+# --------------------------------------------------
+# 1. AUTOMATICALLY DETECT AND LOAD THE INPUT FILE
+# --------------------------------------------------
+
+folder_path = Path(_file_).resolve().parent
+
+# Supported file formats
+supported_extensions = [".xlsx", ".xls", ".csv"]
+
+input_file = None
+
+for extension in supported_extensions:
+    candidate = folder_path / ("array" + extension)
+    if candidate.exists():
+        input_file = candidate
+        break
+
+if input_file is None:
+    raise FileNotFoundError(
+        "Dataset not found! Please keep array.xlsx, array.xls "
+        "or array.csv in the same folder as this Python file."
+    )
 
 
-def main():
-  # Step 0: Create a sample file (You can replace 'student_data.csv' with your own .csv or .xls file)
-  create_sample_dataset()
+def load_dataset(file_path):
 
-  # Step 1: Load Dataset (Use pd.read_excel('filename.xlsx') for .xls/.xlsx files)
-  file_path = 'student_data.csv'
-  if file_path.endswith('.xls') or file_path.endswith('.xlsx'):
-    df = pd.read_excel(file_path)
-  else:
-    df = pd.read_csv(file_path)
+    file_extension = file_path.suffix.lower()
 
-  print('--- 1. Original Dataset ---')
-  print(df)
-  print('\nDataset Shape (Rows, Columns):', df.shape)
+    if file_extension == ".csv":
+        return pd.read_csv(file_path)
 
-  # Step 2: Basic Exploration
-  print('\n--- 2. Dataset Info ---')
-  print(df.info())
+    elif file_extension in [".xls", ".xlsx"]:
+        return pd.read_excel(file_path)
 
-  print('\n--- 3. Summary Statistics ---')
-  print(df.describe(include='all'))
-
-  # Step 3: Check Missing Values
-  print('\n--- 4. Missing Values Count ---')
-  print(df.isnull().sum())
-
-  # Handling Missing Values:
-  # - Fill missing 'Marks' with the mean marks
-  # - Fill missing 'Name' and 'City' with a placeholder or drop rows
-  df['Marks'] = df['Marks'].fillna(df['Marks'].mean())
-  df['Name'] = df['Name'].fillna('Unknown')
-  df['City'] = df['City'].fillna('Not Specified')
-
-  print('\n--- 5. Dataset After Handling Missing Values ---')
-  print(df)
-
-  # Step 4: Identify and Remove Duplicate Records
-  print('\n--- 6. Duplicate Rows Count ---:', df.duplicated().sum())
-  df = df.drop_duplicates()
-  print('Dataset after removing duplicates:')
-  print(df)
-
-  # Step 5: Data Selection and Filtering using .loc[]
-  print('\n--- 7. Filtered Data (Students with Marks >= 85 using .loc[]) ---')
-  high_scorers = df.loc[df['Marks'] >= 85, ['Student_ID', 'Name', 'Marks', 'City']]
-  print(high_scorers)
-
-  # Specific cell selection using .loc[row_label, column_label]
-  print('\n--- 8. Specific Selection (.loc[0, "Name"]) ---')
-  print(df.loc[0, 'Name'])
-
-  # Step 6: Save Cleaned Dataset
-  cleaned_file_path = 'cleaned_student_data.csv'
-  df.to_csv(cleaned_file_path, index=False)
-  print(f'\nCleaned dataset successfully saved to "{cleaned_file_path}".')
+    else:
+        raise ValueError("Unsupported file format!")
 
 
-if __name__ == '__main__':
-  main()
+# Load dataset
+df = load_dataset(input_file)
+
+# Clean column names
+df.columns = df.columns.astype(str).str.strip()
+
+print("=" * 60)
+print("       ASSIGNMENT 6: DATA PREPROCESSING")
+print("=" * 60)
+
+print("\nInput File:", input_file.name)
+
+
+# --------------------------------------------------
+# 2. DISPLAY ORIGINAL DATASET
+# --------------------------------------------------
+
+print("\n1. ORIGINAL DATASET")
+print("-" * 60)
+
+print(df.to_string(index=False))
+
+print("\nNumber of Rows:", df.shape[0])
+print("Number of Columns:", df.shape[1])
+
+
+# --------------------------------------------------
+# 3. DISPLAY FIRST FIVE RECORDS
+# --------------------------------------------------
+
+print("\n2. FIRST FIVE RECORDS")
+print("-" * 60)
+
+print(df.head())
+
+
+# --------------------------------------------------
+# 4. DISPLAY DATASET INFORMATION
+# --------------------------------------------------
+
+print("\n3. DATASET INFORMATION")
+print("-" * 60)
+
+df.info()
+
+
+# --------------------------------------------------
+# 5. BASIC DATA CLEANING
+# --------------------------------------------------
+
+# Remove unwanted spaces from text columns
+for column in df.select_dtypes(include=["object", "string"]).columns:
+
+    df[column] = df[column].astype("string").str.strip()
+
+    # Convert empty strings into missing values
+    df[column] = df[column].replace("", np.nan)
+
+
+# --------------------------------------------------
+# 6. DATA TYPE CONVERSION
+# --------------------------------------------------
+
+print("\n4. DATA TYPE CONVERSION")
+print("-" * 60)
+
+# Convert Age and Marks into numerical data
+for column in df.columns:
+
+    if column.strip().lower() in ["age", "marks"]:
+
+        df[column] = pd.to_numeric(df[column], errors="coerce")
+
+        # Handle infinite values as missing values
+        df[column] = df[column].replace(
+            [np.inf, -np.inf], np.nan
+        )
+
+        print(column, "converted to numerical data type.")
+
+print("\nData Types After Conversion:")
+print(df.dtypes)
+
+
+# --------------------------------------------------
+# 7. IDENTIFY MISSING VALUES
+# --------------------------------------------------
+
+print("\n5. MISSING VALUES")
+print("-" * 60)
+
+missing_values = df.isnull().sum()
+
+print(missing_values)
+
+print("\nTotal Missing Values:", df.isnull().sum().sum())
+
+
+# --------------------------------------------------
+# 8. IDENTIFY DUPLICATE RECORDS
+# --------------------------------------------------
+
+print("\n6. DUPLICATE RECORDS")
+print("-" * 60)
+
+duplicate_count = df.duplicated().sum()
+
+print("Number of Duplicate Records:", duplicate_count)
+
+
+# --------------------------------------------------
+# 9. HANDLE MISSING VALUES
+# --------------------------------------------------
+
+print("\n7. HANDLING MISSING …
