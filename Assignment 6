@@ -1,1 +1,101 @@
+"""
+Title: Data Preprocessing using Python Pandas
+Platform: Windows / Ubuntu (Jupyter Notebook / IDLE / VS Code)
+Description: Demonstrates loading, exploring, handling missing values, 
+             removing duplicates, and filtering data from a .csv/.xls file.
+"""
 
+import numpy as np
+import pandas as pd
+
+
+def create_sample_dataset():
+  """Creates a sample student dataset and saves it as a CSV file for demonstration."""
+  data = {
+      'Student_ID': [101, 102, 103, 104, 105, 106, 107, 104],  # Note: 104 is duplicate
+      'Name': [
+          'Aarav',
+          'Meera',
+          'Rohan',
+          'Priya',
+          'Kabir',
+          np.nan,
+          'Sneha',
+          'Priya',
+      ],
+      'Marks': [85, 90, np.nan, 78, 92, 88, 79, 78],
+      'City': [
+          'Pune',
+          'Mumbai',
+          'Delhi',
+          'Pune',
+          np.nan,
+          'Bangalore',
+          'Chennai',
+          'Pune',
+      ],
+  }
+  df_sample = pd.DataFrame(data)
+  df_sample.to_csv('student_data.csv', index=False)
+  print('Sample dataset "student_data.csv" created successfully.\n')
+
+
+def main():
+  # Step 0: Create a sample file (You can replace 'student_data.csv' with your own .csv or .xls file)
+  create_sample_dataset()
+
+  # Step 1: Load Dataset (Use pd.read_excel('filename.xlsx') for .xls/.xlsx files)
+  file_path = 'student_data.csv'
+  if file_path.endswith('.xls') or file_path.endswith('.xlsx'):
+    df = pd.read_excel(file_path)
+  else:
+    df = pd.read_csv(file_path)
+
+  print('--- 1. Original Dataset ---')
+  print(df)
+  print('\nDataset Shape (Rows, Columns):', df.shape)
+
+  # Step 2: Basic Exploration
+  print('\n--- 2. Dataset Info ---')
+  print(df.info())
+
+  print('\n--- 3. Summary Statistics ---')
+  print(df.describe(include='all'))
+
+  # Step 3: Check Missing Values
+  print('\n--- 4. Missing Values Count ---')
+  print(df.isnull().sum())
+
+  # Handling Missing Values:
+  # - Fill missing 'Marks' with the mean marks
+  # - Fill missing 'Name' and 'City' with a placeholder or drop rows
+  df['Marks'] = df['Marks'].fillna(df['Marks'].mean())
+  df['Name'] = df['Name'].fillna('Unknown')
+  df['City'] = df['City'].fillna('Not Specified')
+
+  print('\n--- 5. Dataset After Handling Missing Values ---')
+  print(df)
+
+  # Step 4: Identify and Remove Duplicate Records
+  print('\n--- 6. Duplicate Rows Count ---:', df.duplicated().sum())
+  df = df.drop_duplicates()
+  print('Dataset after removing duplicates:')
+  print(df)
+
+  # Step 5: Data Selection and Filtering using .loc[]
+  print('\n--- 7. Filtered Data (Students with Marks >= 85 using .loc[]) ---')
+  high_scorers = df.loc[df['Marks'] >= 85, ['Student_ID', 'Name', 'Marks', 'City']]
+  print(high_scorers)
+
+  # Specific cell selection using .loc[row_label, column_label]
+  print('\n--- 8. Specific Selection (.loc[0, "Name"]) ---')
+  print(df.loc[0, 'Name'])
+
+  # Step 6: Save Cleaned Dataset
+  cleaned_file_path = 'cleaned_student_data.csv'
+  df.to_csv(cleaned_file_path, index=False)
+  print(f'\nCleaned dataset successfully saved to "{cleaned_file_path}".')
+
+
+if __name__ == '__main__':
+  main()
